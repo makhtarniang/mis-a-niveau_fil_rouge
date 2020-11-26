@@ -1,16 +1,17 @@
 <?php
 
 namespace App\DataFixtures;
+use App\Entity\CM;
 use App\Entity\User;
 use App\Entity\Profil;
-use App\Entity\Formateur;
+use App\Entity\Apprenant;
 use App\DataFixtures\ProfilFixtures;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class UserFixtures extends Fixture implements DependentFixtureInterface
+class CmFixtures extends Fixture implements DependentFixtureInterface
 {
     public $crypt;
     public function __construct(UserPasswordEncoderInterface $crypt)
@@ -21,13 +22,13 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager)
     {
         
-       $profilUser= new User();
-             $profilUser->setEmail('admin@gmail.com');
-             $profilUser->setNom('admin');
-             $profilUser->setPrenom('admin');
-             $profilUser->setPassword($this->crypt->encodePassword($profilUser,'password'));
-             $profilUser->setProfil($this->getReference(ProfilFixtures::PROFIL_F));
-             $manager->persist($profilUser);
+       $profilCm= new CM();
+             $profilCm->setEmail('cm@gmail.com');
+             $profilCm->setNom('cm');
+             $profilCm->setPrenom('cm');
+             $profilCm->setPassword($this->crypt->encodePassword($profilCm,'password'));
+             $profilCm->setProfil($this->getReference(ProfilFixtures::PROFIL_APP));
+             $manager->persist($profilCm);
              
              $manager->flush();
 }

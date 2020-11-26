@@ -1,13 +1,57 @@
 <?php
 
 namespace App\Entity;
-
-use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Doctrine\ORM\Mapping\InheritanceType;
+use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\DiscriminatorMap ({"formateur"="Formateur","apprenant" = "Apprenant", "cm" = "CM", "user" = "User"})
+ * @ApiResource(
+ *     collectionOperations={
+ *          "get"={
+ *              "method"="GET",
+ *              "path"="admin/users",
+ *              "security"="is_granted('ROLE_Admin')",
+ *              "security_message"="impossible de l'acces"
+ *     },
+ *     "postUser"={
+ *               "method"="POST",
+ *              "path"="admin/users",
+ *              "route_name"="createUser",
+ *              "deserialize"=false,
+ *              "security"="is_granted('ROLE_Admin')",
+ *              "security_message"="impossible de l'acces",
+ *    },
+ *     },
+ *     itemOperations={
+ *         "get",
+ *         "get"={
+ *              "method"="GET",
+ *              "path"="admin/users/{id}",
+ *              "security"="is_granted('ROLE_Admin')",
+ *              "security_message"="impossible de l'acces"
+ *     },
+ * 
+ *       "editUser"={
+ *          "path"="admin/users/{id}",
+ *          "method"="PUT",
+ *          "security"="is_granted('ROLE_Admin')",
+ *          "security_message"="impossible de l'acces"
+ *      },
+ *     }
+ 
+ * )
  */
 class User implements UserInterface
 {
@@ -16,10 +60,14 @@ class User implements UserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({"user_read"})
+     * @Assert\Email(
+     *     message = "email invalid."
+     * )
      */
     private $email;
 
@@ -34,18 +82,33 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user_read"})
+     * @Assert\NotBlank(
+     *     message="Champ nom vide"
+     * )
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user_read"})
+     * @Assert\NotBlank(
+     *     message="Champ prenom vide"
+     * )
      */
     private $prenom;
 
     /**
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="users")
+     * 
      */
     private $profil;
+
+    /**
+     * @ORM\Column(type="blob", nullable=true)
+     */
+    private $avatar;
+
 
     public function getId(): ?int
     {
@@ -160,4 +223,17 @@ class User implements UserInterface
 
         return $this;
     }
+
+    public function getAvatar()
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar($avatar): self
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
 }

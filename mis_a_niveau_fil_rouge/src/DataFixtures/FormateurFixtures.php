@@ -10,7 +10,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class UserFixtures extends Fixture implements DependentFixtureInterface
+class FormateurFixtures extends Fixture implements DependentFixtureInterface
 {
     public $crypt;
     public function __construct(UserPasswordEncoderInterface $crypt)
@@ -21,13 +21,13 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager)
     {
         
-       $profilUser= new User();
-             $profilUser->setEmail('admin@gmail.com');
-             $profilUser->setNom('admin');
-             $profilUser->setPrenom('admin');
-             $profilUser->setPassword($this->crypt->encodePassword($profilUser,'password'));
-             $profilUser->setProfil($this->getReference(ProfilFixtures::PROFIL_F));
-             $manager->persist($profilUser);
+       $profilFor= new Formateur();
+             $profilFor->setEmail('formateur@gmail.com');
+             $profilFor->setNom('niang');
+             $profilFor->setPrenom('aly');
+             $profilFor->setPassword($this->crypt->encodePassword($profilFor,'password'));
+             $profilFor->setProfil($this->getReference(ProfilFixtures::PROFIL_F));
+             $manager->persist($profilFor);
              
              $manager->flush();
 }

@@ -10,14 +10,14 @@ use ApiPlatform\Core\Annotation\ApiResource;
  * @ORM\Entity(repositoryClass=ApprenantRepository::class)
  * @ApiResource()
  */
-class Apprenant 
+class Apprenant extends User
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     public function getId(): ?int
     {

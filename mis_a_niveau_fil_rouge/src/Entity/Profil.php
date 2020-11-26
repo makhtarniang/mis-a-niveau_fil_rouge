@@ -1,16 +1,49 @@
 <?php
-
 namespace App\Entity;
-
+use App\Entity\Profil;
+use Webmozart\Assert\Assert;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProfilRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
  * @ORM\Entity(repositoryClass=ProfilRepository::class)
- * @ApiResource()
+ * @ApiResource(
+ * attributes={
+ *          "security"="(is_granted('ROLE_Cm') or is_granted('ROLE_Admin'))",
+ *          "security_message"="impossible de l'acces",
+ *          "normalization_context"={"groups"={"profil_read"},"enable_max_depth="=true}
+ *      },
+ * collectionOperations={
+ *  "post"={
+ *       "method"="POST",
+ *       "path"="admin/profils"
+ *     },
+ *  "get"=
+ *        {
+ *       "method"="GET",
+ *       "path"="admin/profils"
+ *          }
+ *     },
+ * itemOperations={
+ *       "get"={
+ *          "method"="GET",
+ *          "path"="admin/profils/{id}",
+ *          "defaults"={"id"=null}
+ *     },
+ *     "put"={
+ *          "method"="PUT",
+ *          "path"="admin/profils/{id}",
+ *     }
+ *    }
+ * )
+ * @ApiFilter(BooleanFilter::class, properties={"isdeleted"})
  */
 class Profil
 {
@@ -23,18 +56,23 @@ class Profil
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"profil_read"})
+     
      */
     private $libelle;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", name="is_deleted", options={"default":false})
+     * @Groups({"profil_read"})
      */
     private $is_deleted;
 
     /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil")
+     * 
      */
     private $users;
+
 
     public function __construct()
     {
@@ -101,5 +139,6 @@ class Profil
 
         return $this;
     }
+
 
 }

@@ -13,7 +13,7 @@ class ProfilFixtures extends Fixture
     public const PROFIL_AD ='admin';
     public function load(ObjectManager $manager)
     {
-        $profilFormateur= new Profil();
+       $profilFormateur= new Profil();
         $profilFormateur->setLibelle('Formateur');
         $profilFormateur->setIsDeleted(false);
             $this->addReference(self::PROFIL_F,$profilFormateur);
