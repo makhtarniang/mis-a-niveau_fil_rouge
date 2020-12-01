@@ -26,6 +26,7 @@ class FormateurFixtures extends Fixture implements DependentFixtureInterface
              $profilFor->setNom('niang');
              $profilFor->setPrenom('aly');
              $profilFor->setPassword($this->crypt->encodePassword($profilFor,'password'));
+             $profilFor->setIsdeleted(false);
              $profilFor->setProfil($this->getReference(ProfilFixtures::PROFIL_F));
              $manager->persist($profilFor);
              

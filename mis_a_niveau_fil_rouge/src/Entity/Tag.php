@@ -44,13 +44,13 @@ class Tag
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"tag_read"})
+     * @Groups({"tag_read","grpetag_write"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
-    
+     * @Groups({"grpetag_write"})
      */
     private $descriptif;
 
@@ -64,13 +64,13 @@ class Tag
      */
     private $groupeTags;
 
-   
 
     public function __construct()
     {
         $this->GroupeTag = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->groupeTags = new ArrayCollection();
+        $this->setIsdeleted(false);
     }
 
     public function getId(): ?int

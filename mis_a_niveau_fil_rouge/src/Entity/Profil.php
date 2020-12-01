@@ -1,7 +1,7 @@
 <?php
 namespace App\Entity;
 use App\Entity\Profil;
-use Webmozart\Assert\Assert;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProfilRepository;
 use ApiPlatform\Core\Annotation\ApiFilter;
@@ -14,11 +14,12 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
  * @ORM\Entity(repositoryClass=ProfilRepository::class)
- * @ApiResource(
+* @ApiResource(
  * attributes={
- *          "security"="(is_granted('ROLE_Cm') or is_granted('ROLE_Admin'))",
+ *          "security"="(is_granted('ROLE_Admin'))",
  *          "security_message"="impossible de l'acces",
  *          "normalization_context"={"groups"={"profil_read"},"enable_max_depth="=true}
+ *           
  *      },
  * collectionOperations={
  *  "post"={
@@ -57,7 +58,9 @@ class Profil
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"profil_read"})
-     
+     * @Assert\NotBlank(
+     *     message="Champ libelle est vide"
+     * )
      */
     private $libelle;
 

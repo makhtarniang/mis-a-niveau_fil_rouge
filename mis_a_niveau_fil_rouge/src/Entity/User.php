@@ -25,11 +25,10 @@ use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
  *              "security"="is_granted('ROLE_Admin')",
  *              "security_message"="impossible de l'acces"
  *     },
- *     "postUser"={
+ *     "createUser"={
  *               "method"="POST",
  *              "path"="admin/users",
- *              "route_name"="createUser",
- *              "deserialize"=false,
+ *            "deserialize"=false,
  *              "security"="is_granted('ROLE_Admin')",
  *              "security_message"="impossible de l'acces",
  *    },
@@ -43,7 +42,7 @@ use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
  *              "security_message"="impossible de l'acces"
  *     },
  * 
- *       "editUser"={
+ *       "putUser"={
  *          "path"="admin/users/{id}",
  *          "method"="PUT",
  *          "security"="is_granted('ROLE_Admin')",
@@ -68,6 +67,9 @@ class User implements UserInterface
      * @Assert\Email(
      *     message = "email invalid."
      * )
+     * @Assert\NotBlank(
+     *     message="Champ mail est vide"
+     * )
      */
     private $email;
 
@@ -77,9 +79,12 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Assert\NotBlank(
+     *     message="Champ password est vide"
+     * )
      */
     private $password;
-
+     
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"user_read"})
@@ -108,6 +113,11 @@ class User implements UserInterface
      * @ORM\Column(type="blob", nullable=true)
      */
     private $avatar;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isdeleted;
 
 
     public function getId(): ?int
@@ -232,6 +242,18 @@ class User implements UserInterface
     public function setAvatar($avatar): self
     {
         $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getIsdeleted(): ?bool
+    {
+        return $this->isdeleted;
+    }
+
+    public function setIsdeleted(bool $isdeleted): self
+    {
+        $this->isdeleted = $isdeleted;
 
         return $this;
     }

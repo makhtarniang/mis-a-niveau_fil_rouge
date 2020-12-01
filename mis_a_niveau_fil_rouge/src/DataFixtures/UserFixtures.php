@@ -26,6 +26,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
              $profilUser->setNom('admin');
              $profilUser->setPrenom('admin');
              $profilUser->setPassword($this->crypt->encodePassword($profilUser,'password'));
+             $profilUser->setIsdeleted(false);
              $profilUser->setProfil($this->getReference(ProfilFixtures::PROFIL_F));
              $manager->persist($profilUser);
              

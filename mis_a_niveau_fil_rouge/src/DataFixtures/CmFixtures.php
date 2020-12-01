@@ -27,6 +27,7 @@ class CmFixtures extends Fixture implements DependentFixtureInterface
              $profilCm->setNom('cm');
              $profilCm->setPrenom('cm');
              $profilCm->setPassword($this->crypt->encodePassword($profilCm,'password'));
+             $profilCm->setIsdeleted(false);
              $profilCm->setProfil($this->getReference(ProfilFixtures::PROFIL_APP));
              $manager->persist($profilCm);
              

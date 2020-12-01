@@ -25,6 +25,7 @@ class ApprenantFixtures extends Fixture implements DependentFixtureInterface
              $profilApp->setNom('niang');
              $profilApp->setPrenom('makhtar');
              $profilApp->setPassword($this->crypt->encodePassword($profilApp,'password'));
+             $profilApp->setIsdeleted(true);
              $profilApp->setProfil($this->getReference(ProfilFixtures::PROFIL_APP));
              $manager->persist($profilApp);
              

@@ -26,64 +26,60 @@ class UserController extends AbstractController
      *   defaults={
      *     "_controller"="\app\ControllerUserController::createUser",
      *     "_api_resource_class"=User::class,
-     *     "_api_collection_operation_name"="postUser",
+     *     
+     *     "_api_collection_operation_name"="createUser",
      *    }
      * )
-     * @param Request $request
-     * @param ValidatorInterface $validator
-     * @param SerializerInterface $serializer
-     * @param UserPasswordEncoderInterface $encoder
-     * @param ProfilRepository $repo
-     * @param EntityManagerInterface $manager
-     * @return JsonResponse
      */
-    public function createUsers(Request $request, ValidatorInterface $validator, SerializerInterface $serializer,
-    UserPasswordEncoderInterface $encoder, ProfilRepository $repo, EntityManagerInterface $manager){
-     $userJson= json_decode($request->getcontent(), true);
-     //dd($userJson);
 
-     $avatar = $request->files->get("avatar");
-if ($avatar) {
-     $avatar = fopen($avatar->getRealPath(),"rb");
-     $userJson['avatar'] = $avatar;
-}
-
-    $profil=$repo->find($userJson["profil_id"]);
-    $userJson = $serializer->denormalize($userJson, User::class);
-    $errors = $validator->validate($userJson);
-   // dd("OK");
-        $password = $userJson->getPassword();
-        $userJson->setPassword($encoder->encodePassword($userJson, $password));
-        //$userJson->setIsDeleted(false);
-
-        $userJson->setProfil($profil);
-        $manager->persist($userJson);
+    public function createUser(Request $request,UserPasswordEncoderInterface $encoder,SerializerInterface $serializer,ValidatorInterface $validator,ProfilRepository $profil,EntityManagerInterface $manager)
+    {
+        $user = $request->request->all();
+        //dd($user);
+        $avatar = $request->files->get("avatar");
+        $avatar = fopen($avatar->getRealPath(),"rb");
+        $user["isDeleted"]=
+        $user["avatar"] = $avatar;
+        //dd($avatar);
+        //dd($user);
+        $newprofil=$profil->find($user['profil_id']);
+        $user = $serializer->denormalize($user,'App\Entity\User');
+        $errors = $validator->validate($user);
+        /*if (count($errors)){
+            $errors = $serializer->serialize($errors,"json");
+            return new JsonResponse($errors,Response::HTTP_BAD_REQUEST,[],true);
+        }*/
+        $newprofil->setLibelle("Admin");
+        $newprofil->setIsdeleted(false);
+        $user -> setProfil($newprofil);
+        $user->setIsdeleted(false);
+        $password = $user->getPassword();
+        $user->setPassword($encoder->encodePassword($user,$password));
+        $manager->persist($user);
         $manager->flush();
-        if ($avatar){
-          fclose($avatar);
-        }
-        return $this->json($userJson,Response::HTTP_CREATED);
+        fclose($avatar);
+       return $this->json($serializer->normalize($user,null,["groups"=>"user:read"]),Response::HTTP_CREATED);;
     }
-
-
+    
     /**
-     * @Route(name="editUser",
+     * @Route(name="puttUser",
      *   path="api/admin/users/{id}",
      *   methods={"PUT"},
      *   defaults={
      *     "_controller"="\app\ControllerUserController::editUser",
      *     "_api_resource_class"=User::class,
-     *     "_api_item_operation_name"="editUser",
+     *     "_api_item_operation_name"="puttUser",
      *    }
      * )
      * */
 
-    public function editeUser(Request $request,UserPasswordEncoderInterface $encoder,SerializerInterface $serializer,ValidatorInterface $validator,UserRepository $userrep,EntityManagerInterface $manager,$id)
+    public function editUser(Request $request,UserPasswordEncoderInterface $encoder,SerializerInterface $serializer,ValidatorInterface $validator,UserRepository $userrep,EntityManagerInterface $manager,$id)
     {
         $data = $request->request->all();
-         dd($data['prenom']);
+        // dd($data['prenom']);
         $user= $userrep->find($id);
-        dd($data['prenom']);
+        dd($use);
+     //   dd($data['prenom']);
         if ($request->files->get("avatar"))
         {
             $avatar = $request->files->get("avatar");
@@ -106,10 +102,6 @@ if ($avatar) {
         if (isset ($data['email']))
         {
             $user->setEmail($data['email']);
-        }
-        if (isset ($data['username']))
-        {
-            $user->setUsername($data['username']);
         }
         $errors= $validator->validate($user);
        if (count($errors)){

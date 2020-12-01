@@ -8,11 +8,14 @@ use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 /**
  * @ORM\Entity(repositoryClass=GroupeTagRepository::class)
  * @ApiResource(
+ * denormalizationContext={"groups"={"grpetag_write"}},
  * attributes={
  *          "security"="(is_granted('ROLE_Cm') or is_granted('ROLE_Admin'))",
  *          "security_message"="impossible de l'acces",
@@ -20,22 +23,25 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  * collectionOperations={
  *   "get"={
  *         "path"="/admin/grptags",
- *         "normalization_context"={"groups":" GroupeTag_read"},
+ *        },
+ * "postgrpetag"={
+ *        "method"="POST",
+ *        "path"="admin/grpetags",
+ *        "route_name"="creategrptag",
+ *        "defaults"={"id"=null}
+ * 
  *     },
- *   "post"={
- *        "path"="/admin/grptags",
- *       }
  *     },
  * itemOperations={
  *         "get"={
- *              "path"="/admin/grptags/{id1}",
+ *              "path"="/admin/grptags/{id}",
  *     },
  * "get"={
  *        "path"="/admin/grptags/{id}/tags",
- *    
  *     },
- *     "put"={
- *        "path"="/admin/grptags/{id}",
+ *     "updateGrpTag"={
+ *          "path"="admin/grpetags/{id}",
+ *          "method"="PUT",
  *     }
  *     }
  * 
@@ -53,6 +59,10 @@ class GroupeTag
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"GroupeTag_read","grpetag_write"})
+     * @Assert\NotBlank(
+     *     message="Champ libelle est vide"
+     * )
      */
     private $libelle;
 
@@ -64,12 +74,14 @@ class GroupeTag
     /**
      * @ORM\ManyToMany(targetEntity=Tag::class, mappedBy="groupeTags")
      * @ApiSubresource()
+     * @Groups({"grpetag_write"})
      */
     private $tags;
 
     public function __construct()
     {
         $this->tags = new ArrayCollection();
+        $this->setIsdeleted(false);
     }
 
     public function getId(): ?int
