@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Controller;
-
 use App\Entity\CM;
 use App\Entity\User;
 use App\Entity\Profil;
@@ -26,7 +25,6 @@ class UserController extends AbstractController
      *   defaults={
      *     "_controller"="\app\ControllerUserController::createUser",
      *     "_api_resource_class"=User::class,
-     *     
      *     "_api_collection_operation_name"="createUser",
      *    }
      * )
@@ -45,10 +43,6 @@ class UserController extends AbstractController
         $newprofil=$profil->find($user['profil_id']);
         $user = $serializer->denormalize($user,'App\Entity\User');
         $errors = $validator->validate($user);
-        /*if (count($errors)){
-            $errors = $serializer->serialize($errors,"json");
-            return new JsonResponse($errors,Response::HTTP_BAD_REQUEST,[],true);
-        }*/
         $newprofil->setLibelle("Admin");
         $newprofil->setIsdeleted(false);
         $user -> setProfil($newprofil);
@@ -78,7 +72,7 @@ class UserController extends AbstractController
         $data = $request->request->all();
         // dd($data['prenom']);
         $user= $userrep->find($id);
-        dd($use);
+     //   dd($use);
      //   dd($data['prenom']);
         if ($request->files->get("avatar"))
         {

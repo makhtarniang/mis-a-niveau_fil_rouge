@@ -2,13 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\PromoRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PromoRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PromoRepository::class)
+ * @ApiResource()
  */
 class Promo
 {
@@ -16,71 +19,97 @@ class Promo
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * 
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+    
+     * @Groups({"groupe_read"})
      */
     private $langue;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Groups({"groupe_read"})
      */
     private $titre;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Groups({"groupe_read"})
      */
     private $description;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Groups({"groupe_read"})
      */
     private $lieu;
 
     /**
      * @ORM\Column(type="date")
+     * 
      */
     private $dateDebut;
 
     /**
      * @ORM\Column(type="date")
+     * 
+     * @Groups({"groupe_read"})
      */
     private $dateFinProvisiore;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Groups({"groupe_read"})
      */
     private $fabrique;
 
     /**
      * @ORM\Column(type="date")
+     * 
+     * @Groups({"groupe_read"})
      */
     private $dateFinReele;
 
     /**
      * @ORM\Column(type="boolean")
+     * 
+     * @Groups({"groupe_read"})
      */
     private $etat;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Groups({"groupe_read"})
      */
     private $referenceAgate;
     /**
      * @ORM\OneToMany(targetEntity=Groupe::class, mappedBy="Promo")
      */
-    private $groupes;
+    private $groupe;
 
     /**
      * @ORM\ManyToMany(targetEntity=Formateur::class, mappedBy="Promo")
      */
     private $formateurs;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Referenciel::class, mappedBy="promo")
+     */
+    private $Referenciel;
   
     public function __construct()
     {
         $this->formateurs = new ArrayCollection();
+        $this->Referenciel = new ArrayCollection();
     }
     
     public function getId(): ?int
@@ -247,6 +276,36 @@ class Promo
     {
         if ($this->formateurs->removeElement($formateur)) {
             $formateur->removePromo($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Referenciel[]
+     */
+    public function getReferenciel(): Collection
+    {
+        return $this->Referenciel;
+    }
+
+    public function addReferenciel(Referenciel $referenciel): self
+    {
+        if (!$this->Referenciel->contains($referenciel)) {
+            $this->Referenciel[] = $referenciel;
+            $referenciel->setPromo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReferenciel(Referenciel $referenciel): self
+    {
+        if ($this->Referenciel->removeElement($referenciel)) {
+            // set the owning side to null (unless already changed)
+            if ($referenciel->getPromo() === $this) {
+                $referenciel->setPromo(null);
+            }
         }
 
         return $this;

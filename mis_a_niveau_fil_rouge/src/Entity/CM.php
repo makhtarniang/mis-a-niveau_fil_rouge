@@ -12,12 +12,6 @@ use ApiPlatform\Core\Annotation\ApiResource;
  */
 class CM extends User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
 
     public function getId(): ?int
     {

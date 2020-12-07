@@ -11,8 +11,8 @@ use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
- * @ORM\Entity(repositoryClass=CompetanceRepository::class)
  * @ApiResource(
  *       normalizationContext={"groups"={"competance_read"}},
  * collectionOperations={
@@ -38,7 +38,11 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  *     }
  * )
  * @ApiFilter(BooleanFilter::class, properties={"isdeleted"})
-
+ * @ORM\Entity(repositoryClass=CompetanceRepository::class)
+ * @UniqueEntity(
+ *      fields={"libelle"},
+ *      message="Ce libellé existe déjà"
+ * )
  */
 class Competance
 {
@@ -46,18 +50,19 @@ class Competance
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"grpcompetance_read","referenciel_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competance_read","get"})
+     * @Groups({"competance_read","get","grpcompetance_read","referenciel_read"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competance_read"})
+     * @Groups({"competance_read","grpcompetance_read","referenciel_read"})
      */
     private $descriptif;
 
@@ -75,10 +80,16 @@ class Competance
      */
     private $niveau;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Competance::class, inversedBy="competances")
+     * @Groups({"referenciel_read"})
+     */
+    private $GroupeCompetance;
 
     public function __construct()
     {
         $this->niveau = new ArrayCollection();
+        $this->GroupeCompetance = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -164,6 +175,27 @@ class Competance
         return $this;
     }
 
-   
+    /**
+     * @return Collection|self[]
+     */
+    public function getGroupeCompetance(): Collection
+    {
+        return $this->GroupeCompetance;
+    }
 
+    public function addGroupeCompetance(self $groupeCompetance): self
+    {
+        if (!$this->GroupeCompetance->contains($groupeCompetance)) {
+            $this->GroupeCompetance[] = $groupeCompetance;
+        }
+
+        return $this;
+    }
+
+    public function removeGroupeCompetance(self $groupeCompetance): self
+    {
+        $this->GroupeCompetance->removeElement($groupeCompetance);
+
+        return $this;
+    }
 }

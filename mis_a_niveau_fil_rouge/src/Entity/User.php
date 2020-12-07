@@ -4,11 +4,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping\InheritanceType;
-use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
 
@@ -28,19 +29,18 @@ use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
  *     "createUser"={
  *               "method"="POST",
  *              "path"="admin/users",
- *            "deserialize"=false,
+ *             "deserialize"=false,
  *              "security"="is_granted('ROLE_Admin')",
  *              "security_message"="impossible de l'acces",
  *    },
  *     },
  *     itemOperations={
- *         "get",
- *         "get"={
+ *         "getall"={
  *              "method"="GET",
  *              "path"="admin/users/{id}",
  *              "security"="is_granted('ROLE_Admin')",
  *              "security_message"="impossible de l'acces"
- *     },
+ *          },
  * 
  *       "putUser"={
  *          "path"="admin/users/{id}",
@@ -49,7 +49,6 @@ use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
  *          "security_message"="impossible de l'acces"
  *      },
  *     }
- 
  * )
  */
 class User implements UserInterface
@@ -58,12 +57,15 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"user_read","groupe_read"})
+     * @Groups({"groupe_write"})
      */
     protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"user_read"})
+     * @Groups({"user_read","groupe_read"})
+     * @Groups({"groupe_write"})
      * @Assert\Email(
      *     message = "email invalid."
      * )
@@ -79,6 +81,8 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Groups({"groupe_write"})
+     * @Groups({"groupe_read"})
      * @Assert\NotBlank(
      *     message="Champ password est vide"
      * )
@@ -87,7 +91,7 @@ class User implements UserInterface
      
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user_read"})
+     * @Groups({"user_read","groupe_read"})
      * @Assert\NotBlank(
      *     message="Champ nom vide"
      * )
@@ -96,7 +100,8 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user_read"})
+     * @Groups({"user_read","groupe_read"})
+     * @Groups({"groupe_write"})
      * @Assert\NotBlank(
      *     message="Champ prenom vide"
      * )
@@ -105,17 +110,19 @@ class User implements UserInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="users")
-     * 
+     * @ApiSubresource()
      */
     private $profil;
 
     /**
      * @ORM\Column(type="blob", nullable=true)
+     * @Groups({"groupe_read"})
      */
     private $avatar;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"groupe_write"})
      */
     private $isdeleted;
 

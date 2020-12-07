@@ -1,7 +1,6 @@
 <?php
 namespace App\Entity;
 use App\Entity\Profil;
-use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProfilRepository;
 use ApiPlatform\Core\Annotation\ApiFilter;
@@ -10,13 +9,14 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass=ProfilRepository::class)
 * @ApiResource(
  * attributes={
- *          "security"="(is_granted('ROLE_Admin'))",
+ *        "security"="(is_granted('ROLE_Admin') or is_granted('ROLE_Formateur'))",
  *          "security_message"="impossible de l'acces",
  *          "normalization_context"={"groups"={"profil_read"},"enable_max_depth="=true}
  *           
@@ -45,6 +45,11 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  *    }
  * )
  * @ApiFilter(BooleanFilter::class, properties={"isdeleted"})
+ * @ORM\Entity(repositoryClass=ProfilRepository::class)
+ * @UniqueEntity(
+ *      fields={"libelle"},
+ *      message="Ce libellé existe déjà"
+ * )
  */
 class Profil
 {
@@ -57,7 +62,7 @@ class Profil
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"profil_read"})
+     * @Groups({"profil_read"}) 
      * @Assert\NotBlank(
      *     message="Champ libelle est vide"
      * )
@@ -80,9 +85,8 @@ class Profil
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->setIsDeleted(false);
     }
-
- 
 
     public function getId(): ?int
     {

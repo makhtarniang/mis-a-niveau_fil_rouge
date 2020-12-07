@@ -43,9 +43,6 @@ class ProfilDataPersister implements DataPersisterInterface
         }
         $this->entityManager->persist($data);
         $this->entityManager->flush();
-
-
-        
         
     }
 }

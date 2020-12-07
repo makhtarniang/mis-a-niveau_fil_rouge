@@ -8,12 +8,18 @@ use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 /**
  * @ORM\Entity(repositoryClass=TagRepository::class)
  * @ApiResource(
+ * attributes={
+ *          "security"="(is_granted('ROLE_Cm') or is_granted('ROLE_Formateur'))",
+ *          "security_message"="impossible de l'acces",
+ *      },
  * collectionOperations={
+ *         
  * "get"={
  *         "path"="admin/tags",
  *         "normalization_context"={"groups":"tag_read"},
@@ -45,12 +51,18 @@ class Tag
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"tag_read","grpetag_write"})
+     * @Assert\NotBlank(
+     *     message="Champ libelle est vide"
+     * )
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"grpetag_write"})
+     * @Assert\NotBlank(
+     *     message="Champ descriptif est vide"
+     * )
      */
     private $descriptif;
 

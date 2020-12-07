@@ -2,44 +2,47 @@
 
 namespace App\Entity;
 
+use App\Entity\Promo;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\GroupeRepository;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=GroupeRepository::class)
- **
+ *
  * @ApiResource(
- *     denormalizationContext={"groups"={"groupe_write"}},
- *     collectionOperations={
+ *     attributes={  
+ *          "security"="is_granted('ROLE_Admin') or is_granted('ROLE_Cm')",
+ *          "security_message"="Impossible de l'acces" ,
+ *         "denormalization_context"={"groups"={"groupe_write"},"enable_max_depth="=true} ,
+ *        "normalizationContext"={"groups"={"groupe_read"}}
+ *      },
+ *  collectionOperations={
  *       "get"={
- *          "path" = "admin/groupes",
- *          "normalization_context"={"groups":"groupe:read"},
+ *          "path"="admin/groupes",    
  *     },
  *     "get"={
- *          "path"="admin/groupes/apprenants",
- *          "method"="GET",
- *          "normalization_context"={"groups":"groupeapprenant:read"},
+ *          "path"="admin/groupes/apprenants",  
  *     },
- *     "postapprenantformateur"={
+ *     "post"={
  *          "path"="admin/groupes",
- *          "method"="POST",
+ *          "denormalization_context"={"groups"={"groupe_write"}}
  *     }
  *     },
  *     itemOperations={
  *       "get"={
  *          "path"="admin/groupes/{id}",
- *          "normalization_context"={"groups":"groupe:read"},
  *     },
  *     "put"={
  *          "path"="admin/groupes/{id}/apprenants",
  *          "method"="PUT",
  *     },
- *     "deletegroupeapprenant"={
+ *  "delete"={
  *          "path"="admin/groupes/{id}/apprenants",
- *          "method"="DELETE",
  *
  *     }
  *     }
@@ -51,49 +54,71 @@ class Groupe
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"groupe_write"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"groupe_write"})
+     * @Groups({"groupe_read"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"groupe_write"})
+     * @Groups({"groupe_read"})
      */
     private $dateCreation;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"groupe_write"})
+     * @Groups({"groupe_read"})
      */
     private $statut;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"groupe_write"})
+     * @Groups({"groupe_read"})
      */
     private $type;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Promo::class, inversedBy="groupe")
-     */
-    private $Promo;
 
     /**
      * @ORM\Column(type="boolean")
      */
     private $isdeleted;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Promo::class, inversedBy="groupe")
+     * @Groups({"groupe_write"})
+     */
+    private $Promo;
+
     /** 
      * @ORM\ManyToMany(targetEntity=Apprenant::class, inversedBy="Groupe")
+     * @Groups({"groupe_write"})
+     * @Groups({"groupe_read"})
      */
-
-
     private $apprenants;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Formateur::class, inversedBy="groupes")
+     * @Groups({"groupe_write"})
+     * @Groups({"groupe_read"})
+     */
+    
+    private $formateur;
     
     public function __construct()
     {
         $this->groupes = new ArrayCollection();
+        $this->formateur = new ArrayCollection();
+        $this->apprenant = new ArrayCollection();
+        $this->setIsdeleted(false);
+        $this->setDateCreation(new \DateTime());
     }
 
     public function getId(): ?int
@@ -149,7 +174,7 @@ class Groupe
         return $this;
     }
 
-    public function getPromo(): ?self
+    public function getPromo(): ?Promo
     {
         return $this->Promo;
     }
@@ -161,23 +186,7 @@ class Groupe
         return $this;
     }
 
-    /**
-     * @return Collection|self[]
-     */
-    public function getGroupes(): Collection
-    {
-        return $this->groupes;
-    }
-
-    public function addGroupe(self $groupe): self
-    {
-        if (!$this->groupes->contains($groupe)) {
-            $this->groupes[] = $groupe;
-            $groupe->setPromo($this);
-        }
-
-        return $this;
-    }
+    
    /**
      * @return Collection|Formateur[]
      */
@@ -215,6 +224,13 @@ class Groupe
     public function setIsdeleted(bool $isdeleted): self
     {
         $this->isdeleted = $isdeleted;
+
+        return $this;
+    }
+
+    public function removeFormateur(Formateur $formateur): self
+    {
+        $this->Formateur->removeElement($formateur);
 
         return $this;
     }
