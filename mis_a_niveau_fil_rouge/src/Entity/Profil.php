@@ -57,12 +57,15 @@ class Profil
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"profil_read"}) 
+     * @Groups({"user:write"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"profil_read"}) 
+     * @Groups({"profil_read","user_read"}) 
+     * @Groups({"user:write"})
      * @Assert\NotBlank(
      *     message="Champ libelle est vide"
      * )
@@ -71,7 +74,6 @@ class Profil
 
     /**
      * @ORM\Column(type="boolean", name="is_deleted", options={"default":false})
-     * @Groups({"profil_read"})
      */
     private $is_deleted;
 

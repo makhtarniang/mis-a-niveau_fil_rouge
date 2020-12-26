@@ -19,17 +19,20 @@ use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap ({"formateur"="Formateur","apprenant" = "Apprenant", "cm" = "CM", "user" = "User"})
  * @ApiResource(
- *     collectionOperations={
- *          "get"={
- *              "method"="GET",
+ *     normalizationContext={"groups"={"user_read"}},
+ *     denormalizationContext={"groups":"user:write"},
+ *   collectionOperations={
+ *      "get"={
+ *             "method"="GET",
  *              "path"="admin/users",
+ *              "deserialize"=false,
  *              "security"="is_granted('ROLE_Admin')",
- *              "security_message"="impossible de l'acces"
+ *              "security_message"="Impossible l'acces"
  *     },
  *     "createUser"={
  *               "method"="POST",
  *              "path"="admin/users",
- *             "deserialize"=false,
+ *              "deserialize"=false,
  *              "security"="is_granted('ROLE_Admin')",
  *              "security_message"="impossible de l'acces",
  *    },
@@ -57,15 +60,15 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"user_read","groupe_read"})
-     * @Groups({"groupe_write"})
+     * @Groups({"user_read","groupe_read","get","profilSortie_read"})
+     * @Groups({"groupe_write","profilSortie_write"})
      */
     protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"user_read","groupe_read"})
-     * @Groups({"groupe_write"})
+     * @Groups({"user_read","groupe_read","get","profilSortie_read"})
+     * @Groups({"groupe_write","profilSortie_write"})
      * @Assert\Email(
      *     message = "email invalid."
      * )
@@ -91,7 +94,7 @@ class User implements UserInterface
      
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user_read","groupe_read"})
+     * @Groups({"user_read","groupe_read","get"})
      * @Assert\NotBlank(
      *     message="Champ nom vide"
      * )
@@ -100,8 +103,8 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user_read","groupe_read"})
-     * @Groups({"groupe_write"})
+     * @Groups({"user_read","groupe_read","get","profilSortie_read"})
+     * @Groups({"groupe_write","profilSortie_write"})
      * @Assert\NotBlank(
      *     message="Champ prenom vide"
      * )
@@ -109,6 +112,7 @@ class User implements UserInterface
     private $prenom;
 
     /**
+     * @Groups({"profil_read","user_read","profilSortie_read"})
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="users")
      * @ApiSubresource()
      */
@@ -116,13 +120,14 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="blob", nullable=true)
-     * @Groups({"groupe_read"})
+     * @Groups({"groupe_read","get","user_read","profilSortie_write"})
+     * @Groups({"groupe_write","profilSortie_write"})
      */
     private $avatar;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"groupe_write"})
+     * @Groups({"groupe_write","profilSortie_write","profilSortie_write"})
      */
     private $isdeleted;
 
@@ -243,7 +248,12 @@ class User implements UserInterface
 
     public function getAvatar()
     {
-        return $this->avatar;
+        if($this->avatar)
+        {
+            $avatar_str= stream_get_contents($this->avatar);
+            return base64_encode($avatar_str);
+        }
+        return null;
     }
 
     public function setAvatar($avatar): self

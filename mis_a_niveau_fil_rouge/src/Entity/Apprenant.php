@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Entity;
-
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ApprenantRepository;
 use Doctrine\Common\Collections\Collection;
@@ -16,17 +15,27 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Apprenant extends User
 {
 
-
     /**
      * @ORM\ManyToMany(targetEntity=Groupe::class, mappedBy="apprenants")
      */
     private $Groupe;
 
+    
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ProfilSortie::class, inversedBy ="apprenant")
+     */
+    private $ProfilSortie;
+
+   
+
 
     public function __construct()
     {
         $this->Groupe = new ArrayCollection();
-        $this->apprenants = new ArrayCollection();
+       
+        $this->ProfilSortie = new ArrayCollection();
+      
     }
 
     public function getId(): ?int
@@ -34,31 +43,7 @@ class Apprenant extends User
         return $this->id;
     }
 
-    /**
-     * @return Collection|self[]
-     */
-   /* public function getGroupe(): Collection
-    {
-        return $this->Groupe;
-    }
-
-    public function addGroupe(self $groupe): self
-    {
-        if (!$this->Groupe->contains($groupe)) {
-            $this->Groupe[] = $groupe;
-        }
-
-        return $this;
-    }
-
-    public function removeGroupe(self $groupe): self
-    {
-        $this->Groupe->removeElement($groupe);
-
-        return $this;
-    }
-*/
-    /**
+     /**
      * @return Collection|self[]
      */
     public function getApprenants(): Collection
@@ -84,4 +69,49 @@ class Apprenant extends User
 
         return $this;
     }
+
+    public function getApprenant(): ?self
+    {
+        return $this->apprenant;
+    }
+
+    public function setApprenant(?self $apprenant): self
+    {
+        $this->apprenant = $apprenant;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ProfilSortie[]
+     */
+    public function getProfilSortie(): Collection
+    {
+        return $this->ProfilSortie;
+    }
+
+    public function addProfilSortie(ProfilSortie $profilSortie): self
+    {
+        if (!$this->ProfilSortie->contains($profilSortie)) {
+            $this->ProfilSortie[] = $profilSortie;
+            $profilSortie->setApprenant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProfilSortie(ProfilSortie $profilSortie): self
+    {
+        if ($this->ProfilSortie->removeElement($profilSortie)) {
+            // set the owning side to null (unless already changed)
+            if ($profilSortie->getApprenant() === $this) {
+                $profilSortie->setApprenant(null);
+            }
+        }
+
+        return $this;
+    }
+
+   
+
 }
