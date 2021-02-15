@@ -15,6 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * @ApiResource(
  *       normalizationContext={"groups"={"competance_read"}},
+ *       denormalizationContext={"groups"={"competance_write"}},
  * collectionOperations={
  * "get"={
  *       "method"="GET",
@@ -24,7 +25,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * "post"={
  *          "path"="admin/competences",
  *          "method"="POST",
-
  *       }
  *     },
  * itemOperations={
@@ -34,7 +34,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     },
  *     "put"={
  *        "path"="admin/competences/{id}",
- *     }
+ *     },
+ * "delete"={
+ *       "method"="DELETE",
+ *       "path"="admin/competences/{id}",
+ *       "security"="is_granted('ROLE_Admin')",
+ *       "security_message"="Impossible de l'acces",
+ *     },
  *     }
  * )
  * @ApiFilter(BooleanFilter::class, properties={"isdeleted"})
@@ -50,46 +56,51 @@ class Competance
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"grpcompetance_read","referenciel_read"})
+     * @Groups({"grpcompetance_read","referenciel_read","competance_write"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competance_read","get","grpcompetance_read","referenciel_read"})
+     * @Groups({"competance_read","get","grpcompetance_read","referenciel_read","competance_write"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competance_read","grpcompetance_read","referenciel_read"})
+     * @Groups({"competance_read","grpcompetance_read","referenciel_read","competance_write"})
      */
     private $descriptif;
 
     /**
      * @ORM\Column(type="boolean")
      * @ORM\Column(type="boolean", name="isdeleted", options={"default":false})
-     * @Groups({"competance_read"})
+     * @Groups({"competance_read","competance_write"})
      */
-    private $isdeleted;
+    private $isdeleted =false;
 
     /**
-     * @ORM\OneToMany(targetEntity=Niveau::class, mappedBy="competance")
-     * @Groups({"competance_read","get"})
+     * @ORM\OneToMany(targetEntity=Niveau::class, mappedBy="competance",cascade={"persist"})
+     * @Groups({"competance_read","get","competance_write"})
      
      */
     private $niveau;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Competance::class, inversedBy="competances")
-     * @Groups({"referenciel_read"})
+     * @ORM\ManyToMany(targetEntity=GroupeCometance::class, mappedBy="Competance")
+     * @Groups({"competance_write"})
      */
-    private $GroupeCompetance;
+    private $groupeCometances;
+
+    
+
+   
 
     public function __construct()
     {
         $this->niveau = new ArrayCollection();
-        $this->GroupeCompetance = new ArrayCollection();
+        $this->groupeCometances = new ArrayCollection();
+       
     }
 
     public function getId(): ?int
@@ -176,26 +187,30 @@ class Competance
     }
 
     /**
-     * @return Collection|self[]
+     * @return Collection|GroupeCometance[]
      */
-    public function getGroupeCompetance(): Collection
+    public function getGroupeCometances(): Collection
     {
-        return $this->GroupeCompetance;
+        return $this->groupeCometances;
     }
 
-    public function addGroupeCompetance(self $groupeCompetance): self
+    public function addGroupeCometance(GroupeCometance $groupeCometance): self
     {
-        if (!$this->GroupeCompetance->contains($groupeCompetance)) {
-            $this->GroupeCompetance[] = $groupeCompetance;
+        if (!$this->groupeCometances->contains($groupeCometance)) {
+            $this->groupeCometances[] = $groupeCometance;
+            $groupeCometance->addCompetance($this);
         }
 
         return $this;
     }
 
-    public function removeGroupeCompetance(self $groupeCompetance): self
+    public function removeGroupeCometance(GroupeCometance $groupeCometance): self
     {
-        $this->GroupeCompetance->removeElement($groupeCompetance);
+        if ($this->groupeCometances->removeElement($groupeCometance)) {
+            $groupeCometance->removeCompetance($this);
+        }
 
         return $this;
     }
+
 }

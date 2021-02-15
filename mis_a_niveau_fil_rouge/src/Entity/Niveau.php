@@ -23,26 +23,27 @@ class Niveau
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competance_read","get"})
+     * @Groups({"competance_read","get","competance_write"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competance_read","get"})
+     * @Groups({"competance_read","get","competance_write"})
      */
     private $critereEvaluation;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"competance_read","get"})
+     * @Groups({"competance_read","get","competance_write"})
      */
     private $groupeAction;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"competance_read","get","competance_write"})
      */
-    private $isdeleted;
+    private $isdeleted =false;
 
     /**
      * @ORM\ManyToOne(targetEntity=Competance::class, inversedBy="niveau")

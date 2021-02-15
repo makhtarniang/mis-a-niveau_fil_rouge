@@ -45,9 +45,16 @@ use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
  *              "security_message"="impossible de l'acces"
  *          },
  * 
- *       "putUser"={
- *          "path"="admin/users/{id}",
- *          "method"="PUT",
+ *  "updateUser"={
+ *               "method"="PUT",
+ *               "path"="admin/users/{id}",
+ *               "deserialize"=false,
+ *               "security"="is_granted('ROLE_Admin')",
+ *               "security_message"="impossible de l'acces",
+ *    },
+ * "delete"={
+ *          "path"="admin/user/{id}",
+ *          "method"="DELETE",
  *          "security"="is_granted('ROLE_Admin')",
  *          "security_message"="impossible de l'acces"
  *      },
@@ -68,7 +75,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"user_read","groupe_read","get","profilSortie_read"})
-     * @Groups({"groupe_write","profilSortie_write"})
+     * @Groups({"groupe_write","profilSortie_write", "user:write"})
      * @Assert\Email(
      *     message = "email invalid."
      * )
@@ -84,7 +91,7 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Groups({"groupe_write"})
+     * @Groups({"groupe_write", "user:write"})
      * @Groups({"groupe_read"})
      * @Assert\NotBlank(
      *     message="Champ password est vide"
@@ -94,7 +101,7 @@ class User implements UserInterface
      
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user_read","groupe_read","get"})
+     * @Groups({"user_read","groupe_read","get", "user:write"})
      * @Assert\NotBlank(
      *     message="Champ nom vide"
      * )
@@ -104,7 +111,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"user_read","groupe_read","get","profilSortie_read"})
-     * @Groups({"groupe_write","profilSortie_write"})
+     * @Groups({"groupe_write","profilSortie_write", "user:write"})
      * @Assert\NotBlank(
      *     message="Champ prenom vide"
      * )
@@ -127,7 +134,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"groupe_write","profilSortie_write","profilSortie_write"})
+     * @Groups({"groupe_write","profilSortie_write","profilSortie_write", "user:write"})
      */
     private $isdeleted;
 

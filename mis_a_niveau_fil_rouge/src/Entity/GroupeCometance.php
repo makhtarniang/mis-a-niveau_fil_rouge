@@ -17,11 +17,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  *          "security_message"="impossible de l'acces",
  *      },
  *      normalizationContext={"groups"={"grpcompetance_read"}},
+ *     
  * collectionOperations={
  *  "get"={
  *       "method"="GET",
  *       "path"="admin/grpecompetences",
  *       "defaults"={"id"=null}
+ * 
  *     },
  * "post"={
  *          "path"="admin/grpecompetences",
@@ -48,14 +50,14 @@ class GroupeCometance
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups({"referentiel_read"})
-     * @Groups({"referanciel_write"})
+     * @Groups({"referanciel_write","grpcompetance_read","competance_write"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"referentiel_read"})
-     * @Groups({"referanciel_write"})
+     * @Groups({"referanciel_write","grpcompetance_read"})
      * @Assert\NotBlank(
      *     message="Champ libelle est vide"
      * )
@@ -70,15 +72,9 @@ class GroupeCometance
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"referenciel_read"})
-     * @Groups({"referanciel_write"})
+     * @Groups({"referanciel_write","grpcompetance_read"})
      */
     private $descriptif;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=GroupeCometance::class, inversedBy="groupeCometances")
-     * @Groups({"grpcompetance_read"})
-     */
-    private $Competance;
 
     /**
      * @ORM\ManyToMany(targetEntity=Referenciel::class, inversedBy="groupeCometances")
@@ -86,11 +82,17 @@ class GroupeCometance
      */
     private $Referenciel;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Competance::class, inversedBy="groupeCometances")
+     */
+    private $Competance;
+
+
     public function __construct()
     {
-        $this->Competance = new ArrayCollection();
         $this->Referenciel = new ArrayCollection();
         $this->setIsdeleted(false);
+        $this->Competance = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -135,30 +137,6 @@ class GroupeCometance
     }
 
     /**
-     * @return Collection|self[]
-     */
-    public function getCompetance(): Collection
-    {
-        return $this->Competance;
-    }
-
-    public function addCompetance(self $competance): self
-    {
-        if (!$this->Competance->contains($competance)) {
-            $this->Competance[] = $competance;
-        }
-
-        return $this;
-    }
-
-    public function removeCompetance(self $competance): self
-    {
-        $this->Competance->removeElement($competance);
-
-        return $this;
-    }
-
-    /**
      * @return Collection|Referenciel[]
      */
     public function getReferenciel(): Collection
@@ -182,5 +160,29 @@ class GroupeCometance
         return $this;
     }
 
-    
+    /**
+     * @return Collection|Competance[]
+     */
+    public function getCompetance(): Collection
+    {
+        return $this->Competance;
+    }
+
+    public function addCompetance(Competance $competance): self
+    {
+        if (!$this->Competance->contains($competance)) {
+            $this->Competance[] = $competance;
+        }
+
+        return $this;
+    }
+
+    public function removeCompetance(Competance $competance): self
+    {
+        $this->Competance->removeElement($competance);
+
+        return $this;
+    }
+
+   
 }
